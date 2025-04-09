@@ -9,9 +9,10 @@ User = get_user_model()
 class Quiz(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    is_public = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_public = models.BooleanField(default=False)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="quizzes")
 
     def __str__(self):
