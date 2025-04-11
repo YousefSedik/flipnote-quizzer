@@ -1,4 +1,3 @@
-from .base import *
 import dotenv
 import os
 
