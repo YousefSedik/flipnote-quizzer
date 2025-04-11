@@ -6,7 +6,7 @@ load_dotenv()
 DEBUG = False
 
 CORS_ALLOWED_ORIGINS = [
-    "https://flipnote-quizzer-pro.lovable.app/",
+    "https://flipnote-quizzer-pro.lovable.app",
 ]
 
 DATABASES = {
