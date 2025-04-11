@@ -3,7 +3,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, ProfileSerializer
 
 
 class CreateUserView(CreateAPIView):
@@ -20,7 +20,8 @@ class ViewProfileAPIView(APIView):
 
     def get(self, request):
         user = request.user
-        serializer = RegisterSerializer(user)
+        serializer = ProfileSerializer(user)
+        print(serializer.data)
         return Response(serializer.data)
-    
+
 view_profile = ViewProfileAPIView.as_view()
