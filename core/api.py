@@ -3,7 +3,7 @@ from .pagination import CustomPageNumberPagination
 from rest_framework import generics, permissions
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsOwnerOrPublic
 from .models import Quiz
 
 
@@ -29,19 +29,8 @@ class QuizRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
     permission_classes = [
-        permissions.IsAuthenticated,
-        IsOwnerOrReadOnly,
+        IsOwnerOrPublic,
     ]
-
-    def get_queryset(self):
-        if self.request.user.is_authenticated:
-            return super().get_queryset().filter(owner=self.request.user)
-        return super().get_queryset().filter(is_public=True)
-
-    def get_permissions(self):
-        if self.request.method == "GET":
-            return [permissions.AllowAny()]
-        return super().get_permissions()
 
 
 quiz_retrieve_update_destroy = QuizRetrieveUpdateDestroyAPIView.as_view()
@@ -50,11 +39,7 @@ quiz_retrieve_update_destroy = QuizRetrieveUpdateDestroyAPIView.as_view()
 class QuestionRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = QuestionSerializer
     lookup_field = "pk"
-
-    def get_permissions(self):
-        if self.request.method == "GET":
-            return [permissions.AllowAny()]
-        return super().get_permissions()
+    permission_classes = [IsOwnerOrPublic]
 
     def get_object(self):
         quiz_id = self.kwargs.get(self.lookup_field)
@@ -85,5 +70,17 @@ class QuestionRetrieveAPIView(generics.RetrieveAPIView):
 question_list_create = QuestionRetrieveAPIView.as_view()
 
 
-class CreateQuestion(generics.CreateAPIView):
-    serializer_class = QuestionSerializer
+class PublicQuizAPIView(generics.ListAPIView):
+    serializer_class = QuizSerializer
+    queryset = Quiz.objects.all()
+    pagination_class = CustomPageNumberPagination
+    permission_classes = [permissions.AllowAny]
+    def get_queryset(self):
+        return super().get_queryset().filter(is_public=True)
+
+
+public_quiz_api_view = PublicQuizAPIView.as_view()
+
+
+# class CreateQuestion(generics.CreateAPIView):
+#     serializer_class = QuestionSerializer
