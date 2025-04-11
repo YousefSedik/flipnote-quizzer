@@ -5,7 +5,10 @@ from .base import *
 load_dotenv()
 
 DEBUG = False
-CSRF_TRUSTED_ORIGINS = ["https://flipnote-quizzer-backend.azurewebsites.net"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://flipnote-quizzer-pro.lovable.app",
+    "https://flipnote-quizzer-backend.azurewebsites.net",
+]
 CORS_ALLOWED_ORIGINS = [
     "https://flipnote-quizzer-pro.lovable.app",
 ]
