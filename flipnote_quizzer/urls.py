@@ -25,32 +25,32 @@ urlpatterns = [
     path("auth/", include("accounts.urls")),
     path("", include("core.urls")),
 ]
-if settings.DEBUG:
-    urlpatterns += [
-        path("silk/", include("silk.urls", namespace="silk"))
-    ]  # Silk Profiler
-    from drf_spectacular.views import (
-        SpectacularAPIView,
-        SpectacularRedocView,
-        SpectacularSwaggerView,
-    )
+urlpatterns += [
+    path("silk/", include("silk.urls", namespace="silk"))
+]  # Silk Profiler
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
-    urlpatterns += [
-        path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-        path(
-            "api/schema/swagger-ui/",
-            SpectacularSwaggerView.as_view(url_name="schema"),
-            name="swagger-ui",
-        ),
-        path(
-            "api/schema/redoc/",
-            SpectacularRedocView.as_view(url_name="schema"),
-            name="redoc",
-        ),
-    ]
-    urlpatterns += [
-        path("api-auth/", include("rest_framework.urls")),
-    ]
+urlpatterns += [
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/schema/swagger-ui/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+    path(
+        "api/schema/redoc/",
+        SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
+    ),
+]
+urlpatterns += [
+    path("api-auth/", include("rest_framework.urls")),
+]
+if settings.DEBUG:
     urlpatterns += static(
         settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
     )  # Serve media files in development
