@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from .models import Quiz
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -26,3 +27,10 @@ class IsOwnerOrPublic(permissions.BasePermission):
                 return True
 
         return False
+
+    def has_permission(self, request, view):
+        return (
+            Quiz.objects.filter(
+                owner=request.user, id=request.resolver_match.kwargs["pk"]
+            ).exists()
+        )

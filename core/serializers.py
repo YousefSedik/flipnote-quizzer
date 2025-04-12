@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import (
     Quiz,
-    BaseQuestion,
     MultipleChoiceQuestion,
     WrittenQuestion,
     QuizView,
@@ -17,15 +16,23 @@ class QuizSerializer(serializers.ModelSerializer):
 
 
 class MCQSerializer(serializers.ModelSerializer):
+    quiz = serializers.PrimaryKeyRelatedField(
+        queryset=Quiz.objects.all(), write_only=True
+    )
+
     class Meta:
         model = MultipleChoiceQuestion
-        exclude = ("quiz", "created_at", "updated_at")
+        exclude = ("created_at", "updated_at")
 
 
 class WrittenQuestionSerializer(serializers.ModelSerializer):
+    quiz = serializers.PrimaryKeyRelatedField(
+        queryset=Quiz.objects.all(), write_only=True
+    )
+
     class Meta:
         model = WrittenQuestion
-        exclude = ("quiz", "created_at", "updated_at")
+        exclude = ("created_at", "updated_at")
 
 
 class QuestionSerializer(serializers.Serializer):
@@ -35,8 +42,3 @@ class QuestionSerializer(serializers.Serializer):
 
     class Meta:
         fields = ("mcq_questions", "written_questions", "quiz")
-
-
-class QuestionCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BaseQuestion

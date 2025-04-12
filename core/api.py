@@ -1,7 +1,12 @@
-from .serializers import QuizSerializer, QuestionSerializer
+from .serializers import (
+    QuizSerializer,
+    QuestionSerializer,
+    WrittenQuestionSerializer,
+    MCQSerializer,
+)
 from .pagination import CustomPageNumberPagination
 from rest_framework import generics, permissions
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from .permissions import IsOwnerOrReadOnly, IsOwnerOrPublic
 from .models import Quiz
@@ -75,6 +80,7 @@ class PublicQuizAPIView(generics.ListAPIView):
     queryset = Quiz.objects.all()
     pagination_class = CustomPageNumberPagination
     permission_classes = [permissions.AllowAny]
+
     def get_queryset(self):
         return super().get_queryset().filter(is_public=True)
 
@@ -82,5 +88,18 @@ class PublicQuizAPIView(generics.ListAPIView):
 public_quiz_api_view = PublicQuizAPIView.as_view()
 
 
-# class CreateQuestion(generics.CreateAPIView):
-#     serializer_class = QuestionSerializer
+class CreateQuestionAPIView(generics.CreateAPIView):
+    permission_classes = [IsOwnerOrPublic]
+    def get_serializer(self, *args, **kwargs):
+        if kwargs["data"]:
+            kwargs['data']['quiz'] = self.request.resolver_match.kwargs['pk']
+            type = kwargs["data"].pop("type")
+            if type == "written":
+                return WrittenQuestionSerializer(data=kwargs["data"])
+            elif type == "mcq":
+                return MCQSerializer(data=kwargs["data"])
+            else:
+                raise ValidationError(detail=f"type {type} not supported")
+
+
+create_question_api_view = CreateQuestionAPIView.as_view()
