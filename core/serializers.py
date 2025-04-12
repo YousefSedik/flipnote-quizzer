@@ -3,7 +3,6 @@ from .models import (
     Quiz,
     MultipleChoiceQuestion,
     WrittenQuestion,
-    QuizView,
 )
 
 
@@ -35,7 +34,7 @@ class WrittenQuestionSerializer(serializers.ModelSerializer):
         exclude = ("created_at", "updated_at")
 
 
-class QuestionSerializer(serializers.Serializer):
+class QuestionsSerializer(serializers.Serializer):
     mcq_questions = MCQSerializer(many=True)
     written_questions = WrittenQuestionSerializer(many=True)
     quiz = QuizSerializer()

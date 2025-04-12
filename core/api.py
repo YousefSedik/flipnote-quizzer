@@ -1,6 +1,6 @@
 from .serializers import (
     QuizSerializer,
-    QuestionSerializer,
+    QuestionsSerializer,
     WrittenQuestionSerializer,
     MCQSerializer,
 )
@@ -42,7 +42,7 @@ quiz_retrieve_update_destroy = QuizRetrieveUpdateDestroyAPIView.as_view()
 
 
 class QuestionRetrieveAPIView(generics.RetrieveAPIView):
-    serializer_class = QuestionSerializer
+    serializer_class = QuestionsSerializer
     lookup_field = "pk"
     permission_classes = [IsOwnerOrPublic]
 
@@ -103,3 +103,9 @@ class CreateQuestionAPIView(generics.CreateAPIView):
 
 
 create_question_api_view = CreateQuestionAPIView.as_view()
+
+class DeleteUpdateQuestionAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsOwnerOrPublic]
+    serializer_class = QuestionsSerializer
+
+delete_update_question_api_view = DeleteUpdateQuestionAPIView.as_view()
