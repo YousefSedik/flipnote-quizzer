@@ -13,6 +13,7 @@ class Quiz(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_public = models.BooleanField(default=False)
+    views_count = models.SmallIntegerField(default=0, db_index=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="quizzes")
 
     def __str__(self):
@@ -65,3 +66,4 @@ class QuizView(models.Model):
 
     def __str__(self):
         return f"{self.user} viewed {self.quiz} on {self.viewed_at}"
+

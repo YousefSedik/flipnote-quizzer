@@ -39,9 +39,25 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ["username"]
 
     objects = CustomUserManager()
 
     def __str__(self):
         return self.email
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from core.models import Quiz
+
+
+@receiver(signal=post_save, sender=User)
+def create_init_quiz(instance, created, **kwargs):
+    if created:
+        Quiz.objects.create(
+            title="First Quiz !",
+            description="This is an example of how a quiz looks like !",
+            owner=instance,
+        )
+

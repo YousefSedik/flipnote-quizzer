@@ -9,10 +9,10 @@ class QuizAdmin(admin.ModelAdmin):
     list_filter = ("is_public", "created_at")
     ordering = ("-created_at",)
 
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at", "views_count")
 
     fieldsets = (
-        (None, {"fields": ("title", "description", "owner", "is_public")}),
+        (None, {"fields": ("title", "description", "owner", "is_public", "views_count")}),
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
     )
 
