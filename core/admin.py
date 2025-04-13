@@ -49,9 +49,9 @@ class WrittenQuestionAdmin(admin.ModelAdmin):
 
 @admin.register(QuizView)
 class QuizViewAdmin(admin.ModelAdmin):
-    list_display = ("quiz", "user", "viewed_at")
+    list_display = ("quiz", "user", "viewed_at", "quiz__is_public")
     search_fields = ("quiz__title", "user__username")
-    list_filter = ("viewed_at",)
+    list_filter = ("viewed_at","quiz__is_public")
     ordering = ("-viewed_at",)
     autocomplete_fields = ("quiz",)
     readonly_fields = ("viewed_at",)
