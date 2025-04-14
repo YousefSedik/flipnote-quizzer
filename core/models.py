@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 import uuid
-
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -15,6 +15,10 @@ class Quiz(models.Model):
     is_public = models.BooleanField(default=False)
     views_count = models.SmallIntegerField(default=0, db_index=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="quizzes")
+
+    def view(self):
+        self.views_count += 1
+        self.save()
 
     def __str__(self):
         return self.title
@@ -64,6 +68,9 @@ class QuizView(models.Model):
     class Meta:
         unique_together = ("quiz", "user")
 
+    def update_viewed_at(self):
+        self.viewed_at = timezone.now()
+        self.save()
+
     def __str__(self):
         return f"{self.user} viewed {self.quiz} on {self.viewed_at}"
-

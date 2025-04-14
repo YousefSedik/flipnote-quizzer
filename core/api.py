@@ -8,8 +8,9 @@ from .pagination import CustomPageNumberPagination
 from rest_framework import generics, permissions
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
-from .permissions import IsOwnerOrReadOnly, IsOwnerOrPublic
-from .models import Quiz
+from .permissions import IsOwnerOrReadOnly, IsOwner
+from .models import Quiz, QuizView, MultipleChoiceQuestion, WrittenQuestion
+from django.shortcuts import get_object_or_404
 
 
 class MyQuizListCreate(generics.ListCreateAPIView):
@@ -34,7 +35,8 @@ class QuizRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
     permission_classes = [
-        IsOwnerOrPublic,
+        permissions.IsAuthenticated,
+        IsOwnerOrReadOnly,
     ]
 
 
@@ -44,7 +46,7 @@ quiz_retrieve_update_destroy = QuizRetrieveUpdateDestroyAPIView.as_view()
 class QuestionRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = QuestionsSerializer
     lookup_field = "pk"
-    permission_classes = [IsOwnerOrPublic]
+    permission_classes = [IsOwnerOrReadOnly]
 
     def get_object(self):
         quiz_id = self.kwargs.get(self.lookup_field)
@@ -57,6 +59,14 @@ class QuestionRetrieveAPIView(generics.RetrieveAPIView):
         if not quiz:
             raise NotFound("Quiz not found")
 
+        if self.request.user.is_authenticated:
+            quiz_view, created = QuizView.objects.get_or_create(
+                user=self.request.user, quiz=quiz
+            )
+            if not created:
+                quiz_view.update_viewed_at()
+
+        quiz.view()
         mcq_questions = quiz.mcq_questions.all()
         written_questions = quiz.written_questions.all()
 
@@ -89,10 +99,11 @@ public_quiz_api_view = PublicQuizAPIView.as_view()
 
 
 class CreateQuestionAPIView(generics.CreateAPIView):
-    permission_classes = [IsOwnerOrPublic]
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
+
     def get_serializer(self, *args, **kwargs):
         if kwargs["data"]:
-            kwargs['data']['quiz'] = self.request.resolver_match.kwargs['pk']
+            kwargs["data"]["quiz"] = self.request.resolver_match.kwargs["pk"]
             type = kwargs["data"].pop("type")
             if type == "written":
                 return WrittenQuestionSerializer(data=kwargs["data"])
@@ -104,8 +115,31 @@ class CreateQuestionAPIView(generics.CreateAPIView):
 
 create_question_api_view = CreateQuestionAPIView.as_view()
 
-class DeleteUpdateQuestionAPIView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsOwnerOrPublic]
-    serializer_class = QuestionsSerializer
 
-delete_update_question_api_view = DeleteUpdateQuestionAPIView.as_view()
+class DeleteQuestionAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsOwner]
+
+    def get_object(self):
+        question_type = self.request.resolver_match.kwargs["qtype"]
+        question_id = self.request.resolver_match.kwargs["question_id"]
+        print(question_id)
+        if question_type == "mcq":
+            return get_object_or_404(MultipleChoiceQuestion, pk=question_id)
+        elif question_type == "written":
+            return get_object_or_404(WrittenQuestion, pk=question_id)
+
+
+
+delete_question_api_view = DeleteQuestionAPIView.as_view()
+
+
+class QuizHistoryListAPIView(generics.ListAPIView):
+    serializer_class = QuizSerializer
+    queryset = QuizView.objects.all()
+
+    def get_queryset(self):
+        history = super().get_queryset().filter(user=self.request.user).values("quiz")
+        return Quiz.objects.filter(id__in=history, is_public=True)[:3]
+
+
+quiz_history_list_api_view = QuizHistoryListAPIView.as_view()

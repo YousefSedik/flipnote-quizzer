@@ -5,6 +5,8 @@ from .api import (
     question_list_create,
     public_quiz_api_view,
     create_question_api_view,
+    delete_question_api_view,
+    quiz_history_list_api_view,
 )
 
 urlpatterns = [
@@ -16,5 +18,15 @@ urlpatterns = [
     ),
     path("questions/<uuid:pk>", question_list_create, name="question-list-create"),
     path("quizzes/public", public_quiz_api_view, name="public-quizzes"),
-    path("quizzes/<uuid:pk>/questions", create_question_api_view, name="question-quizzes-create"),
+    path(
+        "quizzes/<uuid:pk>/questions",
+        create_question_api_view,
+        name="question-quizzes-create",
+    ),
+    path(
+        "quizzes/<uuid:pk>/questions/<int:question_id>/<str:qtype>",
+        delete_question_api_view,
+        name="question-delete",
+    ),
+    path("quizzes/history", quiz_history_list_api_view, name="view-history-list"),
 ]
