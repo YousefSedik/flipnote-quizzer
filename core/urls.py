@@ -7,6 +7,7 @@ from .api import (
     create_question_api_view,
     delete_question_api_view,
     quiz_history_list_api_view,
+    extract_questions,
 )
 
 urlpatterns = [
@@ -29,4 +30,5 @@ urlpatterns = [
         name="question-delete",
     ),
     path("quizzes/history", quiz_history_list_api_view, name="view-history-list"),
+    path("extract-questions", extract_questions, name="extract-questions"),
 ]

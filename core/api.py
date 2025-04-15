@@ -4,13 +4,16 @@ from .serializers import (
     WrittenQuestionSerializer,
     MCQSerializer,
 )
+from .models import Quiz, QuizView, MultipleChoiceQuestion, WrittenQuestion
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import NotFound, ValidationError
+from .permissions import IsOwnerOrReadOnly, IsOwner
 from .pagination import CustomPageNumberPagination
 from rest_framework import generics, permissions
-from rest_framework.exceptions import NotFound, ValidationError
-from rest_framework.response import Response
-from .permissions import IsOwnerOrReadOnly, IsOwner
-from .models import Quiz, QuizView, MultipleChoiceQuestion, WrittenQuestion
+from .services import get_content, get_questions
 from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from rest_framework import status
 
 
 class MyQuizListCreate(generics.ListCreateAPIView):
@@ -129,7 +132,6 @@ class DeleteQuestionAPIView(generics.RetrieveUpdateDestroyAPIView):
             return get_object_or_404(WrittenQuestion, pk=question_id)
 
 
-
 delete_question_api_view = DeleteQuestionAPIView.as_view()
 
 
@@ -143,3 +145,34 @@ class QuizHistoryListAPIView(generics.ListAPIView):
 
 
 quiz_history_list_api_view = QuizHistoryListAPIView.as_view()
+
+
+@api_view(["POST"])
+@permission_classes([permissions.IsAuthenticated])
+def extract_questions(request) -> Response:
+    data = {
+        "mcq":[
+            {
+                "text":'dadd',
+                'options':['dasd', 'dasddgfgfdfg', 'adasdhgg'],
+                'answer': 'dasddgfgfdfg'
+            }
+        ],
+        'written':[
+            {
+                'text': 'huadasd',
+                'answer': 'gdfgdfg'
+            }
+        ]
+    }
+    return Response(data)
+    uploaded_file = request.FILES.get("file")
+    if uploaded_file is None:
+        return Response({"error": "file not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+    content, success, err = get_content(uploaded_file)
+    if not success:
+        return Response({"error": err}, status.HTTP_400_BAD_REQUEST)
+
+    mcqs, written = get_questions(content)
+    return Response({"mcqs": mcqs, "written": written})
