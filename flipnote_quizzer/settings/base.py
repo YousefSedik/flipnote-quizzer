@@ -143,3 +143,5 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 AUTH_USER_MODEL = "accounts.User"
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")

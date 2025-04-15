@@ -10,6 +10,8 @@ EMAIL_HOST=''
 EMAIL_PORT=
 EMAIL_USE_TLS='True'
 
+GEMINI_API_KEY=''
+
 # Database 
 DB_NAME=''
 DB_USER=''
