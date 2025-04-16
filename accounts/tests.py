@@ -14,6 +14,9 @@ class UsersManagersTests(APITestCase):
         user = User.objects.create_user(
             email="normal@user.com",
             password="foo",
+            username="normal_user",
+            first_name="Normal",
+            last_name="User",
         )
         self.assertEqual(user.email, "normal@user.com")
         self.assertTrue(user.is_active)
@@ -48,6 +51,7 @@ class UsersTestCases(APITestCase):
         self.user1 = {
             "first_name": "yousef",
             "last_name": "sedik",
+            "username": "yousef",
             "email": "random_email@gmail.com",
             "password": "strong_password1@",
             "password2": "strong_password1@",
