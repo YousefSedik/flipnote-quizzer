@@ -37,10 +37,7 @@ quiz_list_create = MyQuizListCreate.as_view()
 class QuizRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
-    permission_classes = [
-        permissions.IsAuthenticated,
-        IsOwnerOrReadOnly,
-    ]
+    permission_classes = [IsOwnerOrReadOnly]
 
 
 quiz_retrieve_update_destroy = QuizRetrieveUpdateDestroyAPIView.as_view()
@@ -149,21 +146,16 @@ quiz_history_list_api_view = QuizHistoryListAPIView.as_view()
 
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
-def extract_questions(request) -> Response:
+def extract_questions(request):
     data = {
-        "mcq":[
+        "mcq": [
             {
-                "text":'dadd',
-                'options':['dasd', 'dasddgfgfdfg', 'adasdhgg'],
-                'answer': 'dasddgfgfdfg'
+                "text": "dadd",
+                "options": ["dasd", "dasddgfgfdfg", "adasdhgg"],
+                "answer": "dasddgfgfdfg",
             }
         ],
-        'written':[
-            {
-                'text': 'huadasd',
-                'answer': 'gdfgdfg'
-            }
-        ]
+        "written": [{"text": "huadasd", "answer": "gdfgdfg"}],
     }
     return Response(data)
     uploaded_file = request.FILES.get("file")
