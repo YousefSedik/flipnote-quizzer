@@ -5,13 +5,8 @@ from .base import *
 load_dotenv()
 
 DEBUG = False
-CSRF_TRUSTED_ORIGINS = [
-    "https://flipnote-quizzer-pro.lovable.app",
-    "https://flipnote-quizzer-backend.azurewebsites.net",
-]
-CORS_ALLOWED_ORIGINS = [
-    "https://flipnote-quizzer-pro.lovable.app",
-]
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
 MIDDLEWARE += [
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
