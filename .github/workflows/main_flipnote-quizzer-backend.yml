@@ -33,10 +33,6 @@ jobs:
         run: pip install -r requirements.txt
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
-      - name: Collect static files
-        run: |
-          python manage.py collectstatic --noinput
-      
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
 
@@ -54,6 +50,8 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    env:
+      ENVIRONMENT : 'production'
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -74,7 +72,10 @@ jobs:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_910F5C75C574414591C042C37752C8AB }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_93194015AA404B9790CDD436AB0D74E6 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_FED3EEC888434ACC9D3AC5FF615250AE }}
-
+      - name: Collect static files
+        run: |
+          python manage.py collectstatic --noinput
+      
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
