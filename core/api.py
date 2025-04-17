@@ -39,7 +39,6 @@ class QuizRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = QuizSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
-
 quiz_retrieve_update_destroy = QuizRetrieveUpdateDestroyAPIView.as_view()
 
 
@@ -137,7 +136,7 @@ class QuizHistoryListAPIView(generics.ListAPIView):
     queryset = QuizView.objects.all()
 
     def get_queryset(self):
-        history = super().get_queryset().filter(user=self.request.user).values("quiz")
+        history = super().get_queryset().filter(user=self.request.user, quiz__is_public=True).values("quiz")
         return Quiz.objects.filter(id__in=history, is_public=True)[:3]
 
 
