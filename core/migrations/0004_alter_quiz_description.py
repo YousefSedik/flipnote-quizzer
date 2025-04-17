@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0003_quiz_updated_at_alter_quiz_is_public'),
+        ("core", "0003_quiz_updated_at_alter_quiz_is_public"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='quiz',
-            name='description',
+            model_name="quiz",
+            name="description",
             field=models.TextField(blank=True, null=True),
         ),
     ]

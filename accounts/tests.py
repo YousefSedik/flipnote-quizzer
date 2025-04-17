@@ -8,7 +8,6 @@ User = get_user_model()
 
 
 class UsersManagersTests(APITestCase):
-
     def test_create_user(self):
         User = get_user_model()
         user = User.objects.create_user(

@@ -4,19 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0003_rename_customuser_user'),
+        ("accounts", "0003_rename_customuser_user"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='id',
+            model_name="user",
+            name="id",
         ),
         migrations.AlterField(
-            model_name='user',
-            name='email',
-            field=models.EmailField(max_length=254, primary_key=True, serialize=False, unique=True, verbose_name='email address'),
+            model_name="user",
+            name="email",
+            field=models.EmailField(
+                max_length=254,
+                primary_key=True,
+                serialize=False,
+                unique=True,
+                verbose_name="email address",
+            ),
         ),
     ]

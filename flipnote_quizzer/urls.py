@@ -25,9 +25,7 @@ urlpatterns = [
     path("auth/", include("accounts.urls")),
     path("", include("core.urls")),
 ]
-urlpatterns += [
-    path("silk/", include("silk.urls", namespace="silk"))
-]  # Silk Profiler
+urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]  # Silk Profiler
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,

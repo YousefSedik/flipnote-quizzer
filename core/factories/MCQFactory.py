@@ -9,6 +9,8 @@ faker = Faker("en_US")
 User = get_user_model()
 faker.random_choices()
 faker.sentences()
+
+
 class MCQFactory(DjangoModelFactory):
     class Meta:
         model = MultipleChoiceQuestion

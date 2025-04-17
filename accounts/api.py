@@ -7,13 +7,13 @@ from .serializers import RegisterSerializer, ProfileSerializer
 
 
 class CreateUserView(CreateAPIView):
-
     model = get_user_model()
     permission_classes = [permissions.AllowAny]
     serializer_class = RegisterSerializer
 
 
 create_user = CreateUserView.as_view()
+
 
 class ViewProfileAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -23,5 +23,6 @@ class ViewProfileAPIView(APIView):
         serializer = ProfileSerializer(user)
         print(serializer.data)
         return Response(serializer.data)
+
 
 view_profile = ViewProfileAPIView.as_view()

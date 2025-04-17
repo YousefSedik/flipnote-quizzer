@@ -12,7 +12,10 @@ class QuizAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "updated_at", "views_count")
 
     fieldsets = (
-        (None, {"fields": ("title", "description", "owner", "is_public", "views_count")}),
+        (
+            None,
+            {"fields": ("title", "description", "owner", "is_public", "views_count")},
+        ),
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
     )
 
@@ -25,7 +28,7 @@ class MultipleChoiceQuestionAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
 
     readonly_fields = ("created_at", "updated_at")
-    autocomplete_fields = ('quiz', )
+    autocomplete_fields = ("quiz",)
     fieldsets = (
         (None, {"fields": ("text", "quiz", "choices", "correct_answer")}),
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
@@ -51,7 +54,7 @@ class WrittenQuestionAdmin(admin.ModelAdmin):
 class QuizViewAdmin(admin.ModelAdmin):
     list_display = ("quiz", "user", "viewed_at", "quiz__is_public")
     search_fields = ("quiz__title", "user__username")
-    list_filter = ("viewed_at","quiz__is_public")
+    list_filter = ("viewed_at", "quiz__is_public")
     ordering = ("-viewed_at",)
     autocomplete_fields = ("quiz",)
     readonly_fields = ("viewed_at",)

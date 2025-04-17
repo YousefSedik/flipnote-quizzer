@@ -60,4 +60,3 @@ def create_init_quiz(instance, created, **kwargs):
             description="This is an example of how a quiz looks like !",
             owner=instance,
         )
-

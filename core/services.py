@@ -54,8 +54,6 @@ Output Format (JSON):
     response_text = response.text
     try:
         data = json.loads(response_text)
-        print(data)
-        return data.get('mcq'), data.get("written")
+        return data.get("mcq"), data.get("written")
     except json.JSONDecodeError as e:
-        print("Failed to decode JSON:", e)
         return {}, {}
