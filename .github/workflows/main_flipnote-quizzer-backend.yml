@@ -77,7 +77,7 @@ jobs:
         id: deploy-to-webapp
         env:
           ACTIONS_STEP_DEBUG: true
-        timeout-minutes: 10  # Add timeout
+        timeout-minutes: 20  # Add timeout
         with:
           app-name: 'flipnote-quizzer-backend'
           slot-name: 'Production'
