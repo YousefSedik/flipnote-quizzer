@@ -24,26 +24,31 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Create and start virtual environment
+      
+      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
+      - name: Install dependencies
         run: |
           python -m venv venv
           source venv/bin/activate
-      
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
+          pip install -r requirements.txt
+          # Verify Django is installed
+          pip list | grep Django
 
+      - name: Clean static files
+        run: |
+          source venv/bin/activate
+          if [ -d "staticfiles" ]; then rm -rf staticfiles; fi
+
+      - name: Collect static files
+        run: |
+          source venv/bin/activate
+          python -m django --version  # Verify Django is available
+          python manage.py collectstatic --noinput
+
+    
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
       
-      - name: Clean static files
-        run: rm -rf staticfiles
- 
-      - name: Collect static files
-        run: |
-           source venv/bin/activate
-           python manage.py collectstatic --noinput
         
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
