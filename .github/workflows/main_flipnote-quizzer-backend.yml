@@ -14,44 +14,49 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-    env:
-      ENVIRONMENT: 'production'
+      contents: read #This is required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python version
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Create virtual environment
-        run: python -m venv venv
-
+      
+      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
       - name: Install dependencies
         run: |
+          python -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
+          # Verify Django is installed
+          pip list | grep Django
 
       - name: Clean static files
-        run: rm -rf staticfiles
+        run: |
+          source venv/bin/activate
+          if [ -d "staticfiles" ]; then rm -rf staticfiles; fi
 
       - name: Collect static files
         run: |
           source venv/bin/activate
+          python -m django --version  # Verify Django is available
           python manage.py collectstatic --noinput
 
+    
       - name: Zip artifact for deployment
-        run: |
-          zip -r release.zip . -x "venv/*"
-
-      - name: Upload artifact
+        run: zip release.zip ./* -r
+      
+        
+      - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: release.zip
-
+          path: |
+            release.zip
+            !venv/
 
   deploy:
     runs-on: ubuntu-latest
@@ -59,8 +64,6 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    env:
-      ENVIRONMENT : 'production'
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -78,15 +81,14 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_910F5C75C574414591C042C37752C8AB }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_93194015AA404B9790CDD436AB0D74E6 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_FED3EEC888434ACC9D3AC5FF615250AE }}
-      
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_6063ACA76E5E41FA9060DBB2B8C5F0AE }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_116592FAB56D428681510A052088E752 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B38922792B1549B4BFBA7F8E6D248964 }}
+
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
-        env:
-          ACTIONS_STEP_DEBUG: true
         with:
           app-name: 'flipnote-quizzer-backend'
           slot-name: 'Production'
+          
