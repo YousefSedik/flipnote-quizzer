@@ -3,11 +3,12 @@ from .serializers import (
     QuestionsSerializer,
     WrittenQuestionSerializer,
     MCQSerializer,
+    GeneralQuestionSerializer,
 )
 from .models import Quiz, QuizView, MultipleChoiceQuestion, WrittenQuestion
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import NotFound, ValidationError
-from .permissions import IsOwnerOrReadOnly, IsOwner
+from .permissions import IsOwnerOrReadOnly, IsQuizOwner
 from .pagination import CustomPageNumberPagination
 from rest_framework import generics, permissions
 from .services import get_content, get_questions
@@ -28,7 +29,7 @@ class MyQuizListCreate(generics.ListCreateAPIView):
         serializer.save(owner=self.request.user)
 
     def get_queryset(self):
-        return super().get_queryset().filter(owner=self.request.user)
+        return Quiz.objects.filter(owner=self.request.user).prefetch_related("owner")
 
 
 quiz_list_create = MyQuizListCreate.as_view()
@@ -99,25 +100,32 @@ public_quiz_api_view = PublicQuizAPIView.as_view()
 
 
 class CreateQuestionAPIView(generics.CreateAPIView):
-    permission_classes = [permissions.IsAuthenticated, IsOwner]
+    permission_classes = [permissions.IsAuthenticated, IsQuizOwner]
 
     def get_serializer(self, *args, **kwargs):
-        if kwargs["data"]:
-            kwargs["data"]["quiz"] = self.request.resolver_match.kwargs["pk"]
-            type = kwargs["data"].pop("type")
-            if type == "written":
-                return WrittenQuestionSerializer(data=kwargs["data"])
-            elif type == "mcq":
-                return MCQSerializer(data=kwargs["data"])
+        if "data" in kwargs:
+            data = kwargs["data"].copy()
+            data["quiz"] = self.request.resolver_match.kwargs["pk"]
+
+            question_type = data.pop("type", [""])[0]
+
+            if question_type == "written":
+                return WrittenQuestionSerializer(data=data)
+            elif question_type == "mcq":
+                return MCQSerializer(data=data)
             else:
-                raise ValidationError(detail=f"type {type} not supported")
+                raise ValidationError(
+                    f"Question type '{question_type}' is not supported"
+                )
+
+        return super().get_serializer(*args, **kwargs)
 
 
 create_question_api_view = CreateQuestionAPIView.as_view()
 
 
 class DeleteQuestionAPIView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsOwner]
+    permission_classes = [IsQuizOwner]
 
     def get_object(self):
         question_type = self.request.resolver_match.kwargs["qtype"]
@@ -152,17 +160,6 @@ quiz_history_list_api_view = QuizHistoryListAPIView.as_view()
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
 def extract_questions(request):
-    data = {
-        "mcq": [
-            {
-                "text": "dadd",
-                "options": ["dasd", "dasddgfgfdfg", "adasdhgg"],
-                "answer": "dasddgfgfdfg",
-            }
-        ],
-        "written": [{"text": "huadasd", "answer": "gdfgdfg"}],
-    }
-    return Response(data)
     uploaded_file = request.FILES.get("file")
     if uploaded_file is None:
         return Response({"error": "file not found"}, status=status.HTTP_400_BAD_REQUEST)

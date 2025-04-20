@@ -41,3 +41,12 @@ class QuestionsSerializer(serializers.Serializer):
 
     class Meta:
         fields = ("mcq_questions", "written_questions", "quiz")
+
+class GeneralQuestionSerializer(serializers.Serializer):
+    text = serializers.CharField()
+    answer = serializers.CharField()
+    correct_answer = serializers.CharField()
+    options = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+
+    class Meta:
+        fields = ("text", "answer", "correct_answer", "options")

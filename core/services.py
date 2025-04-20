@@ -56,4 +56,4 @@ Output Format (JSON):
         data = json.loads(response_text)
         return data.get("mcq"), data.get("written")
     except json.JSONDecodeError as e:
-        return {}, {}
+        return [], []
