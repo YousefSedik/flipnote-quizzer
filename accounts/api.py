@@ -21,7 +21,6 @@ class ViewProfileAPIView(APIView):
     def get(self, request):
         user = request.user
         serializer = ProfileSerializer(user)
-        print(serializer.data)
         return Response(serializer.data)
 
 

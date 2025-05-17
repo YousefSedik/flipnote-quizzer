@@ -12,9 +12,7 @@ def get_content(uploaded_file) -> list[str]:
         for page in document:
             content.append(page.get_text())
         content = "".join(content)
-        print(content)
     elif uploaded_file.name.endswith(".txt"):
-        print(dir(uploaded_file))
         content = uploaded_file.readlines()
         content = "".join(content)
     else:

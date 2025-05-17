@@ -180,7 +180,6 @@ class CreateQuestionTests(APITestCase):
             with self.subTest(combo=combo):
                 if combo["auth"]:
                     user = self.user if combo["is_owner"] else self.other_user
-                    print(user)
                     self.client.force_authenticate(user=user)
                 else:
                     self.client.force_authenticate(user=None)
@@ -201,8 +200,7 @@ class CreateQuestionTests(APITestCase):
                     }
 
                 response = self.client.post(url, data=data)
-                if combo['auth'] and not combo['is_owner']:
-                    print(self.quiz.owner, self.user, self.other_user )
+
                 self.assertEqual(response.status_code, combo["expected_status"])
 
 

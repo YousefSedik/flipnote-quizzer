@@ -130,7 +130,6 @@ class DeleteQuestionAPIView(generics.RetrieveUpdateDestroyAPIView):
     def get_object(self):
         question_type = self.request.resolver_match.kwargs["qtype"]
         question_id = self.request.resolver_match.kwargs["question_id"]
-        print(question_id)
         if question_type == "mcq":
             return get_object_or_404(MultipleChoiceQuestion, pk=question_id)
         elif question_type == "written":
