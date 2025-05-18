@@ -5,7 +5,7 @@ from .models import Quiz, MultipleChoiceQuestion, WrittenQuestion, QuizView
 @admin.register(Quiz)
 class QuizAdmin(admin.ModelAdmin):
     list_display = ("title", "owner", "is_public", "created_at", "updated_at")
-    search_fields = ("title", "owner__username")
+    search_fields = ("id", "title", "owner__username")
     list_filter = ("is_public", "created_at")
     ordering = ("-created_at",)
 

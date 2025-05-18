@@ -3,7 +3,6 @@ from .serializers import (
     QuestionsSerializer,
     WrittenQuestionSerializer,
     MCQSerializer,
-    GeneralQuestionSerializer,
 )
 from .models import Quiz, QuizView, MultipleChoiceQuestion, WrittenQuestion
 from rest_framework.decorators import api_view, permission_classes
@@ -15,6 +14,8 @@ from .services import get_content, get_questions
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
+from django.utils import timezone
+from django.db.models import Q
 
 
 class MyQuizListCreate(generics.ListCreateAPIView):
@@ -39,6 +40,18 @@ class QuizRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
+    def get_object(self):
+        quiz = super().get_object()
+        if self.request.user.is_authenticated:
+            user = self.request.user
+            # print(quiz[0])
+            QuizView.objects.update_or_create(
+                user=user,
+                quiz=quiz,
+                defaults={"viewed_at": timezone.now()},
+            )
+        return quiz
 
 
 quiz_retrieve_update_destroy = QuizRetrieveUpdateDestroyAPIView.as_view()
@@ -141,15 +154,15 @@ delete_question_api_view = DeleteQuestionAPIView.as_view()
 
 class QuizHistoryListAPIView(generics.ListAPIView):
     serializer_class = QuizSerializer
-    queryset = QuizView.objects.all()
 
     def get_queryset(self):
         history = (
-            super()
-            .get_queryset()
-            .filter(user=self.request.user, quiz__is_public=True)
+            QuizView.objects.filter(user=self.request.user, quiz__is_public=True)
             .values("quiz")
-        )
+            .order_by("-viewed_at")
+        )[:3]
+        if not history:
+            raise NotFound("No quiz history found")
         return Quiz.objects.filter(id__in=history, is_public=True)[:3]
 
 
@@ -169,3 +182,18 @@ def extract_questions(request):
 
     mcqs, written = get_questions(content)
     return Response({"mcqs": mcqs, "written": written})
+
+
+@api_view(["GET"])
+@permission_classes([])
+def quiz_search(request):
+    query: str = request.GET.get("q", "")
+
+    if query.strip():
+        results = Quiz.objects.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        )[:5]
+        serializer = QuizSerializer(results, many=True)
+        return Response(serializer.data)
+
+    return Response([], status=200)
