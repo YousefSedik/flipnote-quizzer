@@ -32,5 +32,5 @@ urlpatterns = [
     ),
     path("quizzes/history", quiz_history_list_api_view, name="view-history-list"),
     path("extract-questions", extract_questions, name="extract-questions"),
-    path("quiz/search", quiz_search, name="search-quiz")
+    path("quiz/search", quiz_search, name="search-quiz"),
 ]

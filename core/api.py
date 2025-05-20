@@ -15,7 +15,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
+from urllib.parse import unquote
 from django.db.models import Q
+import json
 
 
 class MyQuizListCreate(generics.ListCreateAPIView):
@@ -117,11 +119,10 @@ class CreateQuestionAPIView(generics.CreateAPIView):
 
     def get_serializer(self, *args, **kwargs):
         if "data" in kwargs:
+
             data = kwargs["data"].copy()
             data["quiz"] = self.request.resolver_match.kwargs["pk"]
-
-            question_type = data.pop("type", [""])[0]
-
+            question_type = data.pop("type", "")
             if question_type == "written":
                 return WrittenQuestionSerializer(data=data)
             elif question_type == "mcq":
@@ -157,13 +158,17 @@ class QuizHistoryListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         history = (
-            QuizView.objects.filter(user=self.request.user, quiz__is_public=True)
+            QuizView.objects.filter(
+                Q(user=self.request.user)
+                & (Q(quiz__is_public=True) | Q(quiz__owner=self.request.user))
+            )
             .values("quiz")
             .order_by("-viewed_at")
         )[:3]
+        print(history)
         if not history:
             raise NotFound("No quiz history found")
-        return Quiz.objects.filter(id__in=history, is_public=True)[:3]
+        return Quiz.objects.filter(Q(id__in=history) & (Q(is_public=True) | Q(owner=self.request.user)))[:3]
 
 
 quiz_history_list_api_view = QuizHistoryListAPIView.as_view()
@@ -173,10 +178,19 @@ quiz_history_list_api_view = QuizHistoryListAPIView.as_view()
 @permission_classes([permissions.IsAuthenticated])
 def extract_questions(request):
     uploaded_file = request.FILES.get("file")
+    content, success = "", False
     if uploaded_file is None:
-        return Response({"error": "file not found"}, status=status.HTTP_400_BAD_REQUEST)
-
-    content, success, err = get_content(uploaded_file)
+        data = request.body
+        data = json.loads(unquote(str(data, encoding="utf-8")))
+        content = data.get("text")
+        if content is None:
+            return Response(
+                {"error": "file not found"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            success = True
+    else:
+        content, success, err = get_content(uploaded_file)
     if not success:
         return Response({"error": err}, status.HTTP_400_BAD_REQUEST)
 
