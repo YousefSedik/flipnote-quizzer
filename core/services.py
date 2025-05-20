@@ -1,10 +1,9 @@
+from django.core.cache import cache
 from django.conf import settings
 from pydantic import BaseModel
 from google import genai
 import json
 import fitz
-import re
-
 
 def get_content(uploaded_file) -> list[str]:
     content = []
@@ -41,6 +40,10 @@ class QuestionsModel(BaseModel):
 
 
 def get_questions(content):
+    
+    if cache.get(content) is not None:
+        return cache.get(content).mcq, cache.get(content).written
+    
     prompt = f"""
 You are given a document content. 
 You need to extract and format it into 2 categories: written and mcq.
@@ -61,6 +64,8 @@ Document Content:
     print(response_text)
     try:
         data: QuestionsModel = response.parsed
+        # Cache the response for 24 hours
+        cache.set(content, data, timeout=60 * 60 * 24)
         return data.mcq, data.written
     except json.JSONDecodeError as e:
         print("JSON decode error:", str(e))
