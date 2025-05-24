@@ -4,14 +4,20 @@ from pydantic import BaseModel
 from google import genai
 import json
 import fitz
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+MAX_PAGES_SIZE = os.getenv("MAX_PAGES_SIZE", 25)
+
 
 def get_content(uploaded_file) -> list[str]:
     content = []
 
     if uploaded_file.name.endswith(".pdf"):
         document = fitz.open(stream=uploaded_file.read(), filetype="pdf")
-        if len(document) > 15:
-            return "", False, "Max Value of pages is 15"
+        if len(document) > MAX_PAGES_SIZE:
+            return "", False, f"Max Value of pages is {MAX_PAGES_SIZE}"
         for page in document:
             content.append(page.get_text())
         content = "".join(content)
@@ -40,10 +46,10 @@ class QuestionsModel(BaseModel):
 
 
 def get_questions(content):
-    
+
     if cache.get(content) is not None:
         return cache.get(content).mcq, cache.get(content).written
-    
+
     prompt = f"""
 You are given a document content. 
 You need to extract and format it into 2 categories: written and mcq.
