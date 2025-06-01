@@ -19,6 +19,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -26,11 +31,7 @@ urlpatterns = [
     path("", include("core.urls")),
 ]
 urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]  # Silk Profiler
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
+
 
 urlpatterns += [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

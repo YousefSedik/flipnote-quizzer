@@ -1,6 +1,8 @@
-from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractUser
 from django.utils.translation import gettext_lazy as _
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.db import models
 
 
 class CustomUserManager(BaseUserManager):
@@ -47,9 +49,7 @@ class User(AbstractUser):
         return self.email
 
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from core.models import Quiz
+from core.models import Quiz  # noqa: E402
 
 
 @receiver(signal=post_save, sender=User)

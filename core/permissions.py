@@ -1,7 +1,7 @@
 from rest_framework import permissions
 
-class IsQuizOwner(permissions.BasePermission):
 
+class IsQuizOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.owner == request.user
 
@@ -23,7 +23,6 @@ class IsQuizOwner(permissions.BasePermission):
 
 
 class IsQuestionOwner(permissions.BasePermission):
-
     def has_object_permission(self, request, view, obj):
         return obj.quiz.owner == request.user
 

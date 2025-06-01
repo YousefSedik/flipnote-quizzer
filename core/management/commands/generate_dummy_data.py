@@ -28,7 +28,7 @@ class Command(BaseCommand):
                 # Create 3 multiple choice questions for each quiz
                 for _ in range(3):
                     choices = [fake.word() for _ in range(4)]  # 4 choices
-                    question = MultipleChoiceQuestion.objects.create(
+                    MultipleChoiceQuestion.objects.create(
                         quiz=quiz,
                         text=fake.sentence(),
                         choices=choices,
@@ -52,7 +52,7 @@ class Command(BaseCommand):
         for quiz in Quiz.objects.all():
             for _ in range(5):
                 try:
-                    quiz_view = QuizView.objects.create(
+                    QuizView.objects.create(
                         quiz=quiz,
                         user=fake.random_element(elements=User.objects.all()),
                     )

@@ -1,0 +1,20 @@
+repos:
+  # Ruff formatter and linter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.2  # Use latest stable
+    hooks:
+      - id: ruff
+      - id: ruff-format
+
+  # Custom local hook to run Django tests
+  - repo: local
+    hooks:
+      # Backend Django tests
+      - id: django-tests
+        name: Django Tests (backend)
+        # you might adjust this to activate the virtual environment
+
+        entry: bash -c "source ./venv/Scripts/activate && python manage.py test"
+        language: system
+        pass_filenames: false
+        stages: [pre-commit, pre-push]

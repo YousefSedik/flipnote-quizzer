@@ -119,10 +119,9 @@ class CreateQuestionAPIView(generics.CreateAPIView):
 
     def get_serializer(self, *args, **kwargs):
         if "data" in kwargs:
-
             data = kwargs["data"].copy()
             data["quiz"] = self.request.resolver_match.kwargs["pk"]
-            question_type = data.pop("type", "")
+            question_type = data.pop("type", "")[0]
             if question_type == "written":
                 return WrittenQuestionSerializer(data=data)
             elif question_type == "mcq":
@@ -168,7 +167,9 @@ class QuizHistoryListAPIView(generics.ListAPIView):
         print(history)
         if not history:
             raise NotFound("No quiz history found")
-        return Quiz.objects.filter(Q(id__in=history) & (Q(is_public=True) | Q(owner=self.request.user)))[:3]
+        return Quiz.objects.filter(
+            Q(id__in=history) & (Q(is_public=True) | Q(owner=self.request.user))
+        )[:3]
 
 
 quiz_history_list_api_view = QuizHistoryListAPIView.as_view()

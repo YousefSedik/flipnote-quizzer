@@ -200,7 +200,6 @@ class CreateQuestionTests(APITestCase):
                     }
 
                 response = self.client.post(url, data=data)
-
                 self.assertEqual(response.status_code, combo["expected_status"])
 
 

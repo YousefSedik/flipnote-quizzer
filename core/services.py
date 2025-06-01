@@ -46,7 +46,6 @@ class QuestionsModel(BaseModel):
 
 
 def get_questions(content):
-
     if cache.get(content) is not None:
         return cache.get(content).mcq, cache.get(content).written
 
