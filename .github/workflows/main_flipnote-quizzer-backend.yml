@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
+    
     steps:
       - uses: actions/checkout@v4
 
@@ -20,50 +20,34 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Create and activate virtual environment
+      - name: Create and start virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-          echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
-          echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH
-
-      - name: Install dependencies
+      
+      - name: Install dependencies & collectstatic
         run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Clean static files
-        run: |
-          if [ -d "staticfiles" ]; then rm -rf staticfiles; fi
-
-      - name: Collect static files
-        run: |
-          python manage.py collectstatic --noinput
-
-      - name: Remove virtual environment before packaging
-        run: |
-          rm -rf venv/
-
-      - name: Create deployment package
-        run: |
-          zip -r release.zip . -x "*.git*" "*.github*" "__pycache__*" "*.pyc" "venv/*"
+         pip install -r requirements.txt
+         python manage.py collectstatic --noinput
+    
+      - name: Zip artifact for deployment
+        run: zip release.zip ./* -r
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: release.zip
+          path: |
+            release.zip
+            !venv/
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     
     permissions:
       id-token: write
-      contents: read
+      contents: read 
 
     steps:
       - name: Download artifact from build job
@@ -74,6 +58,7 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
