@@ -31,7 +31,18 @@ jobs:
       
       - name: Install dependencies
         run: pip install -r requirements.txt
-        
+
+      - name: Clean static files
+        run: |
+          source venv/bin/activate
+          if [ -d "staticfiles" ]; then rm -rf staticfiles; fi
+
+      - name: Collect static files
+        run: |
+          source venv/bin/activate
+          python -m django --version  # Verify Django is available
+          python manage.py collectstatic --noinput
+      
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
       - name: Zip artifact for deployment
