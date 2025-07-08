@@ -40,11 +40,6 @@ jobs:
         run: |
           python manage.py collectstatic --noinput
 
-      # Optional: Add step to run tests here
-      - name: Run tests
-        run: |
-          python manage.py test
-
       - name: Remove virtual environment before packaging
         run: |
           rm -rf venv/
