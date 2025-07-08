@@ -1,7 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-# More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
-
 name: Build and deploy Python app to Azure Web App - flipnote-quizzer-backend
 
 on:
@@ -14,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -24,45 +20,55 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Create and start virtual environment
+      - name: Create and activate virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-      
+          echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
+          echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH
+
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Clean static files
         run: |
-          source venv/bin/activate
           if [ -d "staticfiles" ]; then rm -rf staticfiles; fi
 
       - name: Collect static files
         run: |
-          source venv/bin/activate
-          python -m django --version  # Verify Django is available
           python manage.py collectstatic --noinput
-      
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+      # Optional: Add step to run tests here
+      - name: Run tests
+        run: |
+          python manage.py test
+
+      - name: Remove virtual environment before packaging
+        run: |
+          rm -rf venv/
+
+      - name: Create deployment package
+        run: |
+          zip -r release.zip . -x "*.git*" "*.github*" "__pycache__*" "*.pyc" "venv/*"
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: |
-            release.zip
-            !venv/
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
       - name: Download artifact from build job
@@ -73,7 +79,6 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
-      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -87,4 +92,3 @@ jobs:
         with:
           app-name: 'flipnote-quizzer-backend'
           slot-name: 'Production'
-          
