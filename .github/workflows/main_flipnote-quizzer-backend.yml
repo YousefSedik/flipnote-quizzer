@@ -24,32 +24,19 @@ jobs:
         with:
           python-version: '3.11'
 
-      
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
-      - name: Install dependencies
+      - name: Create and start virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -r requirements.txt
-          # Verify Django is installed
-          pip list | grep Django
+      
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+        
+      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
-      - name: Clean static files
-        run: |
-          source venv/bin/activate
-          if [ -d "staticfiles" ]; then rm -rf staticfiles; fi
-
-      - name: Collect static files
-        run: |
-          source venv/bin/activate
-          python -m django --version  # Verify Django is available
-          python manage.py collectstatic --noinput
-
-    
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
-      
-        
+
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
@@ -61,9 +48,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -81,9 +66,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_6063ACA76E5E41FA9060DBB2B8C5F0AE }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_116592FAB56D428681510A052088E752 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B38922792B1549B4BFBA7F8E6D248964 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_822E2F4850134DC19B81C6EA82C682FA }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6C98EA44A83D4A8FB04AB4FE964666F9 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8135AC6EA2AF4EF2BA05355CBC849882 }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
