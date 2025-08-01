@@ -2,3 +2,4 @@ venv
 .env
 frontend/node_modules/*
 *.pyc
+debug.log
